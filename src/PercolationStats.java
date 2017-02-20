@@ -11,6 +11,7 @@ public class PercolationStats {
     private int n;
     private int tcount;
     private double[] percolationThresholds;
+    private Percolation[] percolations;
 
     // perform trials independent experiments on an n-by-n grid
     public PercolationStats(int n, int trials) {
@@ -20,8 +21,10 @@ public class PercolationStats {
         this.n = n;
         this.tcount = trials;
         this.percolationThresholds = new double[tcount];
+        this.percolations = new Percolation[trials];
         for (int t = 0; t < tcount; t++) {
             percolationThresholds[t] = 0;
+            percolations[t] = new Percolation(n);
         }
     }
 
@@ -66,12 +69,11 @@ public class PercolationStats {
 
     private void execute() {
         for (int t = 0; t < tcount; t++) {
-            Percolation percolation = new Percolation(n);
-            while (!percolation.percolates()) {
-                int siteToOpen = StdRandom.uniform(n * n - percolation.numberOfOpenSites());
-                openAmongBlocked(siteToOpen, percolation, n);
+            while (!percolations[t].percolates()) {
+                int siteToOpen = StdRandom.uniform(n * n - percolations[t].numberOfOpenSites());
+                openAmongBlocked(siteToOpen, percolations[t], n);
             }
-            percolationThresholds[t] = (double) percolation.numberOfOpenSites() / (n * n);
+            percolationThresholds[t] = (double) percolations[t].numberOfOpenSites() / (n * n);
         }
     }
 
@@ -81,9 +83,7 @@ public class PercolationStats {
         int n = StdIn.readInt();
         int t = StdIn.readInt();
         PercolationStats percolationStats = new PercolationStats(n, t);
-
         percolationStats.execute();
-
         StdOut.println("mean                    = " + percolationStats.mean());
         StdOut.println("stddev                  = " + percolationStats.stddev());
         StdOut.println("95% confidence interval = [" + percolationStats.confidenceLo() + ", "
