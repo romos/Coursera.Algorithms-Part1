@@ -9,6 +9,7 @@ import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 public class Percolation {
     private int n;
     private boolean[][] open;
+    private boolean[][] full;
     private int numberOfOpenSites;
     private WeightedQuickUnionUF weightedQuickUnionUF;
     private final int extraSiteTop;
@@ -21,9 +22,11 @@ public class Percolation {
 
         this.n = n;
         open = new boolean[n + 1][n + 1];
+        full = new boolean[n + 1][n + 1];
         for (int r = 1; r <= n; r++) {
             for (int c = 1; c <= n; c++) {
                 open[r][c] = false;
+                full[r][c] = false;
             }
         }
         numberOfOpenSites = 0;
@@ -56,28 +59,44 @@ public class Percolation {
         // try to connect with neighbouring sites
         // try top site
         if (row != 1)
-            if (open[row - 1][col])
+            if (open[row - 1][col]) {
                 weightedQuickUnionUF.union(
                         getLinearIndex(row, col),
                         getLinearIndex(row - 1, col));
+                if (full[row - 1][col]) {
+                    full[row][col] = true;
+                }
+            }
         // try bottom site
         if (row != n)
-            if (open[row + 1][col])
+            if (open[row + 1][col]) {
                 weightedQuickUnionUF.union(
                         getLinearIndex(row, col),
                         getLinearIndex(row + 1, col));
+                if (full[row + 1][col]) {
+                    full[row][col] = true;
+                }
+            }
         // try left site
         if (col != 1)
-            if (open[row][col - 1])
+            if (open[row][col - 1]) {
                 weightedQuickUnionUF.union(
                         getLinearIndex(row, col),
                         getLinearIndex(row, col - 1));
+                if (full[row][col - 1]) {
+                    full[row][col] = true;
+                }
+            }
         // try right site
         if (col != n)
-            if (open[row][col + 1])
+            if (open[row][col + 1]) {
                 weightedQuickUnionUF.union(
                         getLinearIndex(row, col),
                         getLinearIndex(row, col + 1));
+                if (full[row][col + 1]) {
+                    full[row][col] = true;
+                }
+            }
         // additional case:
         // if current site is one of top or bottom rows,
         // we have to connect it to the 'extra' virtual sites above and below the grid
@@ -86,6 +105,7 @@ public class Percolation {
                     getLinearIndex(row, col),
                     extraSiteTop
             );
+            full[row][col] = true;
         }
         if (row == n) {
             weightedQuickUnionUF.union(
@@ -93,6 +113,30 @@ public class Percolation {
                     extraSiteBottom
             );
         }
+
+        // try to fill
+        if (full[row][col]) {
+            fillNeighbours(row, col, n);
+        }
+    }
+
+    private void fillNeighbours(int row, int col, int num) {
+        fillSite(row - 1, col, num);
+        fillSite(row + 1, col, num);
+        fillSite(row, col - 1, num);
+        fillSite(row, col + 1, num);
+    }
+
+    private void fillSite(int row, int col, int num) {
+        if ((row <= 0) || (row > num) || (col <= 0) || (col > num))
+            return;
+        if (!open[row][col] || full[row][col])
+            return;
+        full[row][col] = true;
+        fillSite(row - 1, col, num);
+        fillSite(row + 1, col, num);
+        fillSite(row, col - 1, num);
+        fillSite(row, col + 1, num);
     }
 
     // is site (row, col) open?
@@ -104,10 +148,9 @@ public class Percolation {
     // is site (row, col) full?
     public boolean isFull(int row, int col) {
         checkRowColumnIndex(row, col, n);
-        if (!isOpen(row, col))
-            return false;
-        // check whether the current (row, col) site is connected to the extraSiteTop
-        return weightedQuickUnionUF.connected(getLinearIndex(row, col), extraSiteTop);
+        return full[row][col];
+//        if (!isOpen(row, col))
+//            return false;
     }
 
     // number of open sites
