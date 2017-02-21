@@ -6,11 +6,14 @@ import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
+import java.util.BitSet;
+
 public class Percolation {
     private int n;
-    private boolean[][] open;
-    private boolean[][] full;
+    private BitSet open;
+    private int numberOfOpenSites;
     private WeightedQuickUnionUF weightedQuickUnionUF;
+
 
     // create n-by-n grid, with all sites blocked
     public Percolation(int n) {
@@ -18,15 +21,8 @@ public class Percolation {
             throw new IllegalArgumentException();
 
         this.n = n;
-        open = new boolean[n + 1][n + 1];
-        full = new boolean[n + 1][n + 1];
-
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= n; j++) {
-                open[i][j] = false;
-                full[i][j] = false;
-            }
-        }
+        open = new BitSet(n*n);
+        numberOfOpenSites = 0;
         weightedQuickUnionUF = new WeightedQuickUnionUF(n * n);
     }
 
@@ -79,63 +75,41 @@ public class Percolation {
         if ((row <= 0) || (row > n) || (col <= 0) || (col > n)) {
             throw new IndexOutOfBoundsException();
         }
-        if (open[row][col])
+        if (open.get(getLinearIndex(row, col)))
             return;
         // open
-        open[row][col] = true;
+        open.set(getLinearIndex(row, col));
+        numberOfOpenSites++;
         // try to connect with neighbouring sites
-        if (open[top(row, col)[0]][top(row, col)[1]])
-            weightedQuickUnionUF.union(
-                    getLinearIndex(row, col),
-                    getLinearIndex(top(row, col)[0], top(row, col)[1]));
-
-        if (open[bottom(row, col)[0]][bottom(row, col)[1]])
-            weightedQuickUnionUF.union(
-                    getLinearIndex(row, col),
-                    getLinearIndex(bottom(row, col)[0], bottom(row, col)[1]));
-        if (open[left(row, col)[0]][left(row, col)[1]])
-            weightedQuickUnionUF.union(
-                    getLinearIndex(row, col),
-                    getLinearIndex(left(row, col)[0], left(row, col)[1]));
-        if (open[right(row, col)[0]][right(row, col)[1]])
-            weightedQuickUnionUF.union(
-                    getLinearIndex(row, col),
-                    getLinearIndex(right(row, col)[0], right(row, col)[1]));
-        // try to fill
-        if ((row == 1) ||
-                (full[top(row, col)[0]][top(row, col)[1]] ||
-                        full[bottom(row, col)[0]][bottom(row, col)[1]] ||
-                        full[left(row, col)[0]][left(row, col)[1]] ||
-                        full[right(row, col)[0]][right(row, col)[1]])) {
-            full[row][col] = true;
-            tryToFillRecursively(row - 1, col);
-            tryToFillRecursively(row + 1, col);
-            tryToFillRecursively(row, col - 1);
-            tryToFillRecursively(row, col + 1);
-        }
-
+        if (row != 1)
+            if (open.get(getLinearIndex(top(row, col)[0], top(row, col)[1])))
+                weightedQuickUnionUF.union(
+                        getLinearIndex(row, col),
+                        getLinearIndex(top(row, col)[0], top(row, col)[1]));
+        if (row != n)
+            if (open.get(getLinearIndex(bottom(row, col)[0], bottom(row, col)[1])))
+                weightedQuickUnionUF.union(
+                        getLinearIndex(row, col),
+                        getLinearIndex(bottom(row, col)[0], bottom(row, col)[1]));
+        if (col != 1)
+            if (open.get(getLinearIndex(left(row, col)[0], left(row, col)[1])))
+                weightedQuickUnionUF.union(
+                        getLinearIndex(row, col),
+                        getLinearIndex(left(row, col)[0], left(row, col)[1]));
+        if (col != n)
+            if (open.get(getLinearIndex(right(row, col)[0], right(row, col)[1])))
+                weightedQuickUnionUF.union(
+                        getLinearIndex(row, col),
+                        getLinearIndex(right(row, col)[0], right(row, col)[1]));
     }
 
-    private void tryToFillRecursively(int row, int col) {
-        if (row < 1 || row > n || col < 1 || col > n) {
-            return;
-        }
-        if (!open[row][col] || full[row][col]) {
-            return;
-        }
-        full[row][col] = true;
-        tryToFillRecursively(row - 1, col);
-        tryToFillRecursively(row + 1, col);
-        tryToFillRecursively(row, col - 1);
-        tryToFillRecursively(row, col + 1);
-    }
 
     // is site (row, col) open?
     public boolean isOpen(int row, int col) {
         if ((row <= 0) || (row > n) || (col <= 0) || (col > n)) {
             throw new IndexOutOfBoundsException();
         }
-        return open[row][col];
+        return open.get(getLinearIndex(row, col));
     }
 
     // is site (row, col) full?
@@ -143,30 +117,29 @@ public class Percolation {
         if ((row <= 0) || (row > n) || (col <= 0) || (col > n)) {
             throw new IndexOutOfBoundsException();
         }
-        return full[row][col];
+        if (!isOpen(row, col))
+            return false;
+
+        for (int c = 1; c <= n; c++) {
+            if (isOpen(1, c) && weightedQuickUnionUF.connected(getLinearIndex(row, col), getLinearIndex(1, c)))
+                return true;
+        }
+        return false;
     }
 
     // number of open sites
     public int numberOfOpenSites() {
-        int result = 0;
-        for (int i = 1; i <= n; i++) {
-            for (int j = 1; j <= n; j++) {
-                if (isOpen(i, j)) {
-                    result++;
-                }
-            }
-        }
-        return result;
+        return numberOfOpenSites;
     }
 
     // does the system percolate?
     public boolean percolates() {
         // for each site of row #1
-        for (int c1 = 1; c1 <= n; c1++) {
-            if (isOpen(1, c1)) {
+        for (int cn = 1; cn <= n; cn++) {
+            if (open.get(getLinearIndex(n, cn))) {
                 // for each site of row #n
-                for (int cn = 1; cn <= n; cn++) {
-                    if (isOpen(n, cn)) {
+                for (int c1 = 1; c1 <= n; c1++) {
+                    if (open.get(getLinearIndex(1, c1))) {
                         // check whether they are connected
                         if (weightedQuickUnionUF.connected(getLinearIndex(n, cn), getLinearIndex(1, c1))) {
                             return true;
