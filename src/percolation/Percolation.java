@@ -1,3 +1,4 @@
+package percolation;
 /**
  * Created by oderor on 2/19/2017.
  */

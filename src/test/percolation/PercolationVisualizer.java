@@ -16,10 +16,13 @@
  *
  ******************************************************************************/
 
+package test.percolation;
+
 import java.awt.Font;
 
 import edu.princeton.cs.algs4.In;
 import edu.princeton.cs.algs4.StdDraw;
+import percolation.Percolation;
 
 public class PercolationVisualizer {
 
@@ -62,8 +65,9 @@ public class PercolationVisualizer {
     }
 
     public static void main(String[] args) {
-        String f = "C:\\Users\\oderor\\algs4\\percolation\\percolation-testing\\percolation\\input3.txt";
+        String f = ".\\src\\test\\percolation\\input3.txt";
         In in = new In(f);      // input file
+//        In in = new In(args[0]);      // input file
         int n = in.readInt();         // n-by-n percolation system
 
         // turn on animation mode
