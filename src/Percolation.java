@@ -6,14 +6,13 @@ import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
 import edu.princeton.cs.algs4.WeightedQuickUnionUF;
 
-import java.util.BitSet;
-
 public class Percolation {
     private int n;
-    private BitSet open;
+    private boolean[][] open;
     private int numberOfOpenSites;
     private WeightedQuickUnionUF weightedQuickUnionUF;
-
+    private final int extraSiteTop;
+    private final int extraSiteBottom;
 
     // create n-by-n grid, with all sites blocked
     public Percolation(int n) {
@@ -21,110 +20,94 @@ public class Percolation {
             throw new IllegalArgumentException();
 
         this.n = n;
-        open = new BitSet(n*n);
+        open = new boolean[n + 1][n + 1];
+        for (int r = 1; r <= n; r++) {
+            for (int c = 1; c <= n; c++) {
+                open[r][c] = false;
+            }
+        }
         numberOfOpenSites = 0;
-        weightedQuickUnionUF = new WeightedQuickUnionUF(n * n);
+        // create a weightedQuickUnionUF based on the n-by-n grid + 2 additional virtual sites
+        weightedQuickUnionUF = new WeightedQuickUnionUF(n * n + 2);
+        // Numbers n^2 and n^2+1 are reserved for virtual sites
+        extraSiteTop = n * n;
+        extraSiteBottom = n * n + 1;
     }
 
+    // transform (r,c) to a linear index [0;n^2)
     private int getLinearIndex(int row, int col) {
         return (row - 1) * n + (col - 1);
     }
 
-    private int[] top(int row, int col) {
-        int[] site = new int[2];
-        site[0] = row;
-        site[1] = col;
-        if (row > 1) {
-            site[0] = row - 1;
+    private void checkRowColumnIndex(int row, int col, int num) {
+        if ((row <= 0) || (row > num) || (col <= 0) || (col > num)) {
+            throw new IndexOutOfBoundsException();
         }
-        return site;
-    }
-
-    private int[] bottom(int row, int col) {
-        int[] site = new int[2];
-        site[0] = row;
-        site[1] = col;
-        if (row < n) {
-            site[0] = row + 1;
-        }
-        return site;
-    }
-
-    private int[] left(int row, int col) {
-        int[] site = new int[2];
-        site[0] = row;
-        site[1] = col;
-        if (col > 1) {
-            site[1] = col - 1;
-        }
-        return site;
-    }
-
-    private int[] right(int row, int col) {
-        int[] site = new int[2];
-        site[0] = row;
-        site[1] = col;
-        if (col < n) {
-            site[1] = col + 1;
-        }
-        return site;
     }
 
     // open site (row, col) if it is not open already
     public void open(int row, int col) {
-        if ((row <= 0) || (row > n) || (col <= 0) || (col > n)) {
-            throw new IndexOutOfBoundsException();
-        }
-        if (open.get(getLinearIndex(row, col)))
+        checkRowColumnIndex(row, col, n);
+        if (open[row][col])
             return;
         // open
-        open.set(getLinearIndex(row, col));
+        open[row][col] = true;
         numberOfOpenSites++;
         // try to connect with neighbouring sites
+        // try top site
         if (row != 1)
-            if (open.get(getLinearIndex(top(row, col)[0], top(row, col)[1])))
+            if (open[row - 1][col])
                 weightedQuickUnionUF.union(
                         getLinearIndex(row, col),
-                        getLinearIndex(top(row, col)[0], top(row, col)[1]));
+                        getLinearIndex(row - 1, col));
+        // try bottom site
         if (row != n)
-            if (open.get(getLinearIndex(bottom(row, col)[0], bottom(row, col)[1])))
+            if (open[row + 1][col])
                 weightedQuickUnionUF.union(
                         getLinearIndex(row, col),
-                        getLinearIndex(bottom(row, col)[0], bottom(row, col)[1]));
+                        getLinearIndex(row + 1, col));
+        // try left site
         if (col != 1)
-            if (open.get(getLinearIndex(left(row, col)[0], left(row, col)[1])))
+            if (open[row][col - 1])
                 weightedQuickUnionUF.union(
                         getLinearIndex(row, col),
-                        getLinearIndex(left(row, col)[0], left(row, col)[1]));
+                        getLinearIndex(row, col - 1));
+        // try right site
         if (col != n)
-            if (open.get(getLinearIndex(right(row, col)[0], right(row, col)[1])))
+            if (open[row][col + 1])
                 weightedQuickUnionUF.union(
                         getLinearIndex(row, col),
-                        getLinearIndex(right(row, col)[0], right(row, col)[1]));
+                        getLinearIndex(row, col + 1));
+        // additional case:
+        // if current site is one of top or bottom rows,
+        // we have to connect it to the 'extra' virtual sites above and below the grid
+        if (row == 1) {
+            weightedQuickUnionUF.union(
+                    getLinearIndex(row, col),
+                    extraSiteTop
+            );
+        }
+        if (row == n) {
+            weightedQuickUnionUF.union(
+                    getLinearIndex(row, col),
+                    extraSiteBottom
+            );
+        }
     }
-
 
     // is site (row, col) open?
     public boolean isOpen(int row, int col) {
-        if ((row <= 0) || (row > n) || (col <= 0) || (col > n)) {
-            throw new IndexOutOfBoundsException();
-        }
-        return open.get(getLinearIndex(row, col));
+        checkRowColumnIndex(row, col, n);
+        return open[row][col];
     }
 
     // is site (row, col) full?
     public boolean isFull(int row, int col) {
-        if ((row <= 0) || (row > n) || (col <= 0) || (col > n)) {
-            throw new IndexOutOfBoundsException();
-        }
+        checkRowColumnIndex(row, col, n);
         if (!isOpen(row, col))
             return false;
-
-        for (int c = 1; c <= n; c++) {
-            if (isOpen(1, c) && weightedQuickUnionUF.connected(getLinearIndex(row, col), getLinearIndex(1, c)))
-                return true;
-        }
-        return false;
+        // check whether the current (row, col) site is connected to the extraSiteTop
+        return weightedQuickUnionUF.connected(getLinearIndex(row, col), extraSiteTop);
     }
 
     // number of open sites
@@ -134,21 +117,8 @@ public class Percolation {
 
     // does the system percolate?
     public boolean percolates() {
-        // for each site of row #1
-        for (int cn = 1; cn <= n; cn++) {
-            if (open.get(getLinearIndex(n, cn))) {
-                // for each site of row #n
-                for (int c1 = 1; c1 <= n; c1++) {
-                    if (open.get(getLinearIndex(1, c1))) {
-                        // check whether they are connected
-                        if (weightedQuickUnionUF.connected(getLinearIndex(n, cn), getLinearIndex(1, c1))) {
-                            return true;
-                        }
-                    }
-                }
-            }
-        }
-        return false;
+        // check whether they are connected
+        return weightedQuickUnionUF.connected(extraSiteTop, extraSiteBottom);
     }
 
     // test client (optional)

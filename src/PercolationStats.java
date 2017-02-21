@@ -4,8 +4,8 @@
 
 import edu.princeton.cs.algs4.StdIn;
 import edu.princeton.cs.algs4.StdOut;
-import edu.princeton.cs.algs4.StdStats;
 import edu.princeton.cs.algs4.StdRandom;
+import edu.princeton.cs.algs4.StdStats;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +14,6 @@ public class PercolationStats {
     private int n;
     private int tcount;
     private double[] percolationThresholds;
-//    private Percolation[] percolations;
 
     // perform trials independent experiments on an n-by-n grid
     public PercolationStats(int n, int trials) {
@@ -24,10 +23,8 @@ public class PercolationStats {
         this.n = n;
         this.tcount = trials;
         this.percolationThresholds = new double[tcount];
-//        this.percolations = new Percolation[trials];
         for (int t = 0; t < tcount; t++) {
             percolationThresholds[t] = 0;
-//            percolations[t] = new Percolation(n);
         }
         execute();
     }

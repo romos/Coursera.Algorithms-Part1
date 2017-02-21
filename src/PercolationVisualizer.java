@@ -62,7 +62,7 @@ public class PercolationVisualizer {
     }
 
     public static void main(String[] args) {
-        String f = "C:\\Users\\oderor\\algs4\\percolation\\percolation-testing\\percolation\\input6.txt";
+        String f = "C:\\Users\\oderor\\algs4\\percolation\\percolation-testing\\percolation\\input7.txt";
         In in = new In(f);      // input file
         int n = in.readInt();         // n-by-n percolation system
 
