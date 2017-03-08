@@ -80,8 +80,8 @@ public class SampleClient {
 
         // print and draw the line segments
 //        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
-//        FastCollinearPoints collinear = new FastCollinearPoints(points);
-        Fast2 collinear = new Fast2(points);
+//        FastCollinearPoints_easier collinear = new FastCollinearPoints_easier(points);
+        FastCollinearPoints collinear = new FastCollinearPoints(points);
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
             segment.draw();
