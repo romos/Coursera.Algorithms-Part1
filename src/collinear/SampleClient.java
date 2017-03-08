@@ -12,9 +12,9 @@ import java.util.Arrays;
  */
 public class SampleClient {
     public static void main(String[] args) {
-//        testPoints();
-        testFromFile("C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\" +
-                "test\\collinear\\horizontal5.txt");
+//        testFromFile("C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\test\\collinear\\kw1260.txt");
+        testFromFile("C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\test\\collinear\\horizontal5.txt");
+//        testFromFile("C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\test\\collinear\\vertical5.txt");
     }
 
     private static void testPoints(){
@@ -80,8 +80,8 @@ public class SampleClient {
 
         // print and draw the line segments
 //        BruteCollinearPoints collinear = new BruteCollinearPoints(points);
-//        FastCollinearPoints_easier collinear = new FastCollinearPoints_easier(points);
         FastCollinearPoints collinear = new FastCollinearPoints(points);
+//        FastCollinearPoints_hashmap collinear = new FastCollinearPoints_hashmap(points);
         for (LineSegment segment : collinear.segments()) {
             StdOut.println(segment);
             segment.draw();
