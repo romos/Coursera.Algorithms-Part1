@@ -1,4 +1,4 @@
-package collinear;
+// package collinear;
 /******************************************************************************
  * Compilation:  javac Point.java
  * Execution:    java Point

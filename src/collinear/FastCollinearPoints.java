@@ -1,4 +1,4 @@
-package collinear;
+// package collinear;
 
 import java.util.*;
 
@@ -34,6 +34,10 @@ public class FastCollinearPoints {
         }
         // get a copy of points due to immutability, and another copy to keep slopeOrder
         int numberOfPoints = points.length;
+        if (numberOfPoints < minNumOfPointsOnLine){
+            segments = new LineSegment[numberOfSegments];
+            return;
+        }
         Point[] points1 = points.clone();
         Arrays.sort(points1);
         Point[] pointsInSlopeOrder = points.clone();
@@ -48,9 +52,9 @@ public class FastCollinearPoints {
             sort(pointsInSlopeOrder, p.slopeOrder()); // sort all the points due to 'p' slopeOrder
             List<Point> collinearPoints = new ArrayList<>();
             int numCollinearPoints = 0;
-            double slope = p.slopeTo(pointsInSlopeOrder[0]);
+            double slope = p.slopeTo(pointsInSlopeOrder[1]);
             double prevSlope;
-            for (int j = 0; j < pointsInSlopeOrder.length; j++) { // find points with the same slope
+            for (int j = 1; j < pointsInSlopeOrder.length; j++) { // find points with the same slope
                 if (pointsInSlopeOrder[j] == p) {
                     continue;
                 }
