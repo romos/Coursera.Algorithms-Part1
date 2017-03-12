@@ -1,10 +1,8 @@
-// package puzzle;
+package puzzle;
 
 import edu.princeton.cs.algs4.Queue;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * Created by oderor on 3/12/2017.
