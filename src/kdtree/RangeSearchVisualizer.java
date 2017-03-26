@@ -23,16 +23,19 @@ public class RangeSearchVisualizer {
     public static void main(String[] args) {
 
 //        String filename = args[0];
-        String filename = "C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\test\\kdtree\\input100K.txt";
+        String filename = "C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\test\\kdtree\\circle10.txt";
+//        String filename = "C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\test\\kdtree\\horizontal8.txt";
+//        String filename = "C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\test\\kdtree\\vertical7.txt";
+//        String filename = "C:\\workspace\\coursera\\algorithms_part1\\algs4-exercises\\src\\test\\kdtree\\input10K.txt";
         In in = new In(filename);
 
         StdDraw.enableDoubleBuffering();
 
         // initialize the data structures with N points from standard input
-//        PointSET brute = new PointSET();
-        PointSET_3dparty brute = new PointSET_3dparty();
-//        KdTree kdtree = new KdTree();
-        KdTree_3dparty kdtree = new KdTree_3dparty();
+        PointSET brute = new PointSET();
+//        PointSET_3dparty brute = new PointSET_3dparty();
+        KdTree kdtree = new KdTree();
+//        KdTree_3dparty kdtree = new KdTree_3dparty();
         while (!in.isEmpty()) {
             double x = in.readDouble();
             double y = in.readDouble();
