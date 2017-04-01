@@ -20,7 +20,6 @@ public class KdTreeVisualizer {
         RectHV rect = new RectHV(0.0, 0.0, 1.0, 1.0);
         StdDraw.enableDoubleBuffering();
         KdTree kdtree = new KdTree();
-//        KdTree_3dparty kdtree = new KdTree_3dparty();
         while (true) {
             if (StdDraw.mousePressed()) {
                 double x = StdDraw.mouseX();
